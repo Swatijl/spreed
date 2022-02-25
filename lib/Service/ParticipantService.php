@@ -920,6 +920,8 @@ class ParticipantService {
 			$this->changeInCall($room, $participant, Participant::FLAG_DISCONNECTED, true);
 		}
 
+		$this->sessionMapper->resetInCallByIds($changedSessionIds);
+
 		$event->setSessionIds($changedSessionIds);
 
 		$this->dispatcher->dispatch(Room::EVENT_AFTER_END_CALL_FOR_EVERYONE, $event);
@@ -952,7 +954,9 @@ class ParticipantService {
 		}
 
 		$session->setInCall($flags);
-		$this->sessionMapper->update($session);
+		if (!$endCallForEveryone) {
+			$this->sessionMapper->update($session);
+		}
 
 		if ($flags !== Participant::FLAG_DISCONNECTED) {
 			$attendee = $participant->getAttendee();
